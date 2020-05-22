@@ -1716,3 +1716,15 @@ node_modules/xdg-basedir/index.js
 node_modules/xdg-basedir/license
 node_modules/xdg-basedir/package.json
 node_modules/xdg-basedir/readme.md
+node_modules/dotenv/CHANGELOG.md
+node_modules/dotenv/config.js
+node_modules/dotenv/LICENSE
+node_modules/dotenv/package.json
+node_modules/dotenv/README.md
+node_modules/dotenv/lib/cli-options.js
+node_modules/dotenv/lib/env-options.js
+node_modules/dotenv/lib/main.js
+node_modules/dotenv/types/index.d.ts
+node_modules/dotenv/types/test.ts
+node_modules/dotenv/types/tsconfig.json
+node_modules/dotenv/types/tslint.json
