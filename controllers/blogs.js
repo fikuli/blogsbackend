@@ -13,10 +13,10 @@ const Blog = require('../models/blog')
     const blog = new Blog(request.body)
 
     if(blog.title===undefined){
-      response.status(400).json('title missing')
+      response.status(400).json({error: 'title missing'})
     }
     else if(blog.url===undefined){
-      response.status(400).json('url missing')
+      response.status(400).json({error: 'url missing'})
     }
     else if(blog.likes===undefined){
       const aa = new Blog({
