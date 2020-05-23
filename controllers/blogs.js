@@ -1,16 +1,30 @@
 
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 
 
   blogsRouter.get('/', async (request, response) => {
-    const blogs = await Blog.find({})
+    const blogs = await Blog.find({}).populate('user', {username:1, name:1})
     response.json(blogs.map(blog=>blog.toJSON()))
   })
   
+
+
+
   blogsRouter.post('/', async (request, response) => {
     const blog = new Blog(request.body)
+
+    const users = await User.find({})
+
+    const currentUser = users[0]
+
+    const eklenecek = {
+      user: currentUser._id,
+      ...request.body
+    }
+
 
     if(blog.title===undefined){
       response.status(400).json({error: 'title missing'})
@@ -20,16 +34,20 @@ const Blog = require('../models/blog')
     }
     else if(blog.likes===undefined){
       const aa = new Blog({
-        title: blog.title,
-        author: blog.author,
-        url: blog.url,
-        likes: 0
+        likes: 0, ...eklenecek
       })
       const result = await aa.save()
+      currentUser.blogs = currentUser.blogs.concat(result._id)
+      await currentUser.save()
+
       response.status(201).json(result)
     }
     else{
-      const result = await blog.save()
+      const xxx = new Blog(eklenecek)
+      const result = await xxx.save()
+
+      currentUser.blogs = currentUser.blogs.concat(result._id)
+      await currentUser.save()
       response.status(201).json(result)
     }
   })
