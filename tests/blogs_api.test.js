@@ -8,37 +8,37 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 
 const initialBlogs = [
-    { title: "React patterns", author: "Michael Chan", url: "https://reactpatterns.com/", likes: 7 }
+    { title: 'React patterns', author: 'Michael Chan', url: 'https://reactpatterns.com/', likes: 7 }
 ]
 
 const checkBlogs = [
-    { title: "Canonical string reduction", author: "Edsger W. Dijkstra", url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html", likes: 12 },
-    { title: "First class tests", author: "Robert C. Martin", url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll", likes: 10 },
-    { title: "TDD harms architecture", author: "Robert C. Martin", url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html", likes: 0 },
-    { title: "Type wars", author: "Robert C. Martin", url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html", likes: 2 }
+    { title: 'Canonical string reduction', author: 'Edsger W. Dijkstra', url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html', likes: 12 },
+    { title: 'First class tests', author: 'Robert C. Martin', url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll', likes: 10 },
+    { title: 'TDD harms architecture', author: 'Robert C. Martin', url: 'http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html', likes: 0 },
+    { title: 'Type wars', author: 'Robert C. Martin', url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html', likes: 2 }
 ]
 
-let token = '';
+let token = ''
 
 beforeAll(async () => {
     await Blog.deleteMany({})
     await User.deleteMany({})
 
-    const salt = bcrypt.genSaltSync(10);
-    const passwordHash = bcrypt.hashSync('dummy', salt);
+    const salt = bcrypt.genSaltSync(10)
+    const passwordHash = bcrypt.hashSync('dummy', salt)
     const user = new User({ username: 'dummy', name: 'dummy dummuy', passwordHash })
     await user.save()
 
     let blogObject = new Blog({user: user, ...initialBlogs[0]})
     const result = await blogObject.save()
     user.blogs = user.blogs.concat(result._id)
-    const a = await user.save()
+    await user.save()
 
-    const ekle = { username: "dummy", password: "dummy" }
+    const ekle = { username: 'dummy', password: 'dummy' }
 
     let response = await api
-    .post('/api/login')
-    .send(ekle)
+        .post('/api/login')
+        .send(ekle)
 
     token = response.body.token    
 })
@@ -88,9 +88,9 @@ describe('missing params', () => {
 
     test('a new blog without title', async () => {
 
-        const ekle = { author: "dene", url: "dene" }
+        const ekle = { author: 'dene', url: 'dene' }
 
-        const response = await api
+        await api
             .post('/api/blogs')
             .set('Authorization', `bearer ${token}`)
             .send(ekle)
@@ -100,9 +100,9 @@ describe('missing params', () => {
 
     test('a new blog without url', async () => {
 
-        const ekle = { title: "dene", author: "dene", likes: 4 }
+        const ekle = { title: 'dene', author: 'dene', likes: 4 }
 
-        const response = await api
+        await api
             .post('/api/blogs')
             .set('Authorization', `bearer ${token}`)
             .send(ekle)
@@ -113,7 +113,7 @@ describe('missing params', () => {
 
     test('a new blog without likes', async () => {
 
-        const ekle = { title: "dene", author: "dene", url: "dene" }
+        const ekle = { title: 'dene', author: 'dene', url: 'dene' }
 
         const response = await api
             .post('/api/blogs')
@@ -150,7 +150,7 @@ describe('post', () => {
 describe('remove', () => {
     test('delete', async () => {
 
-        const ekle = { title: "sil", author: "sil", url: "sil" }
+        const ekle = { title: 'sil', author: 'sil', url: 'sil' }
 
         const response = await api
             .post('/api/blogs')
@@ -171,8 +171,8 @@ describe('remove', () => {
 describe('put', () => {
     test('update', async () => {
 
-        const ekle = { title: "sil", author: "sil", url: "sil" }
-        const updated = { title: "sil", author: "sil", url: "sil", likes: 5 }
+        const ekle = { title: 'sil', author: 'sil', url: 'sil' }
+        const updated = { title: 'sil', author: 'sil', url: 'sil', likes: 5 }
 
         const response = await api
             .post('/api/blogs')
