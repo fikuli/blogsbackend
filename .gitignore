@@ -22019,3 +22019,4 @@ node_modules/mongoose-unique-validator/index.js
 node_modules/mongoose-unique-validator/package.json
 node_modules/mongoose-unique-validator/README.md
 node_modules/mongoose-unique-validator/yarn.lock
+.env
