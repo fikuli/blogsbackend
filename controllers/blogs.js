@@ -1,7 +1,9 @@
 
 const blogsRouter = require('express').Router()
+const jwt = require('jsonwebtoken')
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const config = require('../utils/config')
 
 
 
@@ -11,14 +13,24 @@ const User = require('../models/user')
   })
   
 
-
-
   blogsRouter.post('/', async (request, response) => {
+    const secret = config.SECRET
+    let decodedToken = ''
+    console.log(request.token)
+    try {
+      decodedToken = jwt.verify(request.token, secret)
+    } catch (e) {
+      return response.status(401).json({
+        error: 'invalid token'
+      })
+    }
+
+    if (!request.token || !decodedToken.id) {
+      return response.status(401).json({ error: 'token missing or invalid' })
+    }
+    const currentUser = await User.findById(decodedToken.id)
+  
     const blog = new Blog(request.body)
-
-    const users = await User.find({})
-
-    const currentUser = users[0]
 
     const eklenecek = {
       user: currentUser._id,
@@ -54,8 +66,31 @@ const User = require('../models/user')
 
 
   blogsRouter.delete('/:id', async (request, response) => {
-    await Blog.findByIdAndRemove(request.params.id)
-    response.status(204).end()
+
+    const secret = config.SECRET
+    let decodedToken = ''
+    console.log(request.token)
+    try {
+      decodedToken = jwt.verify(request.token, secret)
+    } catch (e) {
+      return response.status(401).json({
+        error: 'invalid token'
+      })
+    }
+
+    if (!request.token || !decodedToken.id) {
+      return response.status(401).json({ error: 'token missing or invalid' })
+    }
+
+    const bb = await Blog.findById(request.params.id)
+
+    if(decodedToken.id.toString()===bb.user.toString()){
+      await Blog.findByIdAndRemove(request.params.id)
+      return response.status(204).end()
+    }
+    else{
+      return response.status(401).json({ error: 'invalid user' })
+    }
   })
 
 
@@ -63,6 +98,25 @@ const User = require('../models/user')
 
   blogsRouter.put('/:id', async (request, response) => {
 
+    const secret = config.SECRET
+    let decodedToken = ''
+    console.log(request.token)
+    try {
+      decodedToken = jwt.verify(request.token, secret)
+    } catch (e) {
+      return response.status(401).json({
+        error: 'invalid token'
+      })
+    }
+
+    if (!request.token || !decodedToken.id) {
+      return response.status(401).json({ error: 'token missing or invalid' })
+    }
+
+
+    const bb = await Blog.findById(request.params.id)
+
+    if(decodedToken.id.toString()===bb.user.toString()){
     const aa = {
       title: request.body.title,
       author: request.body.author,
@@ -72,7 +126,10 @@ const User = require('../models/user')
 
     const result = await Blog.findByIdAndUpdate(request.params.id, aa, { new: true})
     response.json(result.toJSON())
-
+  }
+  else{
+    return response.status(401).json({ error: 'invalid user' })
+  }
 })
 
 

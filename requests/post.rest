@@ -1,9 +1,10 @@
 POST http://localhost:3003/api/blogs/
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFsaSIsImlkIjoiNWVjOTU1YzE2MGIyZmYwOWQ0N2UzNTQ4IiwiaWF0IjoxNTkwMzEzNzU3fQ.r8S5NvQAPboilvqyoyiL8EUWfTK4bq07P54WDxtOIGk
 
 {
-    "title": "ooo",
-    "author": "ooo",
-    "url": "ooo",
+    "title": "sil2",
+    "author": "2222",
+    "url": "2222",
     "likes": "33"
 }

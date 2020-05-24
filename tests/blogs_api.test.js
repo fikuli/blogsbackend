@@ -1,13 +1,14 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const bcrypt = require('bcryptjs')
 const app = require('../app')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 const initialBlogs = [
-    { title: "React patterns", author: "Michael Chan", url: "https://reactpatterns.com/", likes: 7 },
-    { title: "Go To Statement Considered Harmful", author: "Edsger W. Dijkstra", url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html", likes: 5 }
+    { title: "React patterns", author: "Michael Chan", url: "https://reactpatterns.com/", likes: 7 }
 ]
 
 const checkBlogs = [
@@ -17,15 +18,31 @@ const checkBlogs = [
     { title: "Type wars", author: "Robert C. Martin", url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html", likes: 2 }
 ]
 
-beforeEach(async () => {
+let token = '';
+
+beforeAll(async () => {
     await Blog.deleteMany({})
+    await User.deleteMany({})
 
-    let blogObject = new Blog(initialBlogs[0])
-    await blogObject.save()
+    const salt = bcrypt.genSaltSync(10);
+    const passwordHash = bcrypt.hashSync('dummy', salt);
+    const user = new User({ username: 'dummy', name: 'dummy dummuy', passwordHash })
+    await user.save()
 
-    blogObject = new Blog(initialBlogs[1])
-    await blogObject.save()
+    let blogObject = new Blog({user: user, ...initialBlogs[0]})
+    const result = await blogObject.save()
+    user.blogs = user.blogs.concat(result._id)
+    const a = await user.save()
+
+    const ekle = { username: "dummy", password: "dummy" }
+
+    let response = await api
+    .post('/api/login')
+    .send(ekle)
+
+    token = response.body.token    
 })
+
 
 
 describe('initials', () => {
@@ -65,6 +82,8 @@ describe('field check', () => {
     })
 })
 
+
+
 describe('missing params', () => {
 
     test('a new blog without title', async () => {
@@ -73,6 +92,7 @@ describe('missing params', () => {
 
         const response = await api
             .post('/api/blogs')
+            .set('Authorization', `bearer ${token}`)
             .send(ekle)
             .expect(400)
 
@@ -84,6 +104,7 @@ describe('missing params', () => {
 
         const response = await api
             .post('/api/blogs')
+            .set('Authorization', `bearer ${token}`)
             .send(ekle)
             .expect(400)
 
@@ -96,6 +117,7 @@ describe('missing params', () => {
 
         const response = await api
             .post('/api/blogs')
+            .set('Authorization', `bearer ${token}`)
             .send(ekle)
 
         expect(ekle.likes).toBeUndefined()
@@ -103,11 +125,13 @@ describe('missing params', () => {
     })
 })
 
+
 describe('post', () => {
     test('a new blog', async () => {
 
         await api
             .post('/api/blogs')
+            .set('Authorization', `bearer ${token}`)
             .send(checkBlogs[0])
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -116,12 +140,13 @@ describe('post', () => {
 
         const titles = response.body.map(r => r.title)
 
-        expect(response.body).toHaveLength(initialBlogs.length + 1)
         expect(titles).toContain(
             checkBlogs[0].title
         )
     })
 })
+
+
 describe('remove', () => {
     test('delete', async () => {
 
@@ -129,16 +154,19 @@ describe('remove', () => {
 
         const response = await api
             .post('/api/blogs')
+            .set('Authorization', `bearer ${token}`)
             .send(ekle)
 
         const id = response.body.id
 
         await api
             .delete(`/api/blogs/${id}`)
+            .set('Authorization', `bearer ${token}`)
             .expect(204)
 
     })
 })
+
 
 describe('put', () => {
     test('update', async () => {
@@ -148,17 +176,40 @@ describe('put', () => {
 
         const response = await api
             .post('/api/blogs')
+            .set('Authorization', `bearer ${token}`)
             .send(ekle)
 
         const id = response.body.id
 
         const result = await api
             .put(`/api/blogs/${id}`)
+            .set('Authorization', `bearer ${token}`)
             .send(updated)
 
         expect(result.body.likes).toBe(updated.likes)
 
     })
+})
+
+
+describe('faulty tokens', () => {
+    test('missing token', async () => {
+
+        await api
+            .post('/api/blogs')
+            .send(checkBlogs[0])
+            .expect(401)
+    })
+
+    test('wrong token', async () => {
+
+        await api
+            .post('/api/blogs')
+            .set('Authorization', `bearer${token}i`)
+            .send(checkBlogs[0])
+            .expect(401)
+    })
+
 })
 
 afterAll(() => {
