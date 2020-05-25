@@ -38,10 +38,10 @@ blogsRouter.post('/', async (request, response) => {
     }
 
 
-    if(blog.title===undefined){
+    if(blog.title===undefined || blog.title.length===0){
         response.status(400).json({error: 'title missing'})
     }
-    else if(blog.url===undefined){
+    else if(blog.url===undefined|| blog.url.length===0){
         response.status(400).json({error: 'url missing'})
     }
     else if(blog.likes===undefined){
