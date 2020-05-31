@@ -96,7 +96,6 @@ blogsRouter.delete('/:id', async (request, response) => {
 
 blogsRouter.put('/:id', async (request, response) => {
 
-  console.log(request.body)
     const secret = config.SECRET
     let decodedToken = ''
     try {
