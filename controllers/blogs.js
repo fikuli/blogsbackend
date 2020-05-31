@@ -96,6 +96,7 @@ blogsRouter.delete('/:id', async (request, response) => {
 
 blogsRouter.put('/:id', async (request, response) => {
 
+  console.log(request.body)
     const secret = config.SECRET
     let decodedToken = ''
     try {
@@ -116,7 +117,8 @@ blogsRouter.put('/:id', async (request, response) => {
         title: request.body.title,
         author: request.body.author,
         url: request.body.url,
-        likes: request.body.likes
+        likes: request.body.likes,
+        comments: request.body.comments
     }
 
     const result = await Blog.findByIdAndUpdate(request.params.id, aa, { new: true })
